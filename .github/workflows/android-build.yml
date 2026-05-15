@@ -1,0 +1,49 @@
+name: Android 构建 APK
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: 构建 APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
+      - name: 设置 Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: "platforms;android-34 build-tools;34.0.0"
+
+      - name: 授予 gradlew 执行权限
+        run: chmod +x gradlew
+
+      - name: 构建 Debug APK
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: 上传 APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: stickerpal-debug
+          path: app/build/outputs/apk/debug/app-debug.apk
+
+      - name: 运行单元测试
+        run: ./gradlew test --stacktrace
+
+      - name: 显示测试结果
+        if: always()
+        run: |
+          echo "===== 测试结果 ====="
+          find . -name "TEST-*.xml" -exec cat {} \; | grep -E "testcase|tests=|failures=" || true
