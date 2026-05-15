@@ -3,8 +3,6 @@ name: Android 构建 APK
 on:
   push:
     branches: [main, master]
-  pull_request:
-    branches: [main, master]
   workflow_dispatch:
 
 jobs:
@@ -22,21 +20,22 @@ jobs:
           java-version: "17"
           distribution: "temurin"
 
-      - name: 设置 Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          packages: "platforms;android-34 build-tools;34.0.0"
-
       - name: 设置 Gradle
         uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: "8.2"
 
       - name: 生成 Gradle Wrapper
-        run: gradle wrapper --gradle-version 8.2
+        run: |
+          gradle wrapper --gradle-version 8.2
+
+      - name: 写入 local.properties
+        run: |
+          echo "sdk.dir=${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}" > local.properties
 
       - name: 构建 Debug APK
         run: ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: 运行单元测试
+        run: ./gradlew test --no-daemon --stacktrace
 
       - name: 上传 APK
         if: always()
@@ -44,13 +43,3 @@ jobs:
         with:
           name: stickerpal-debug
           path: app/build/outputs/apk/debug/app-debug.apk
-
-      - name: 运行单元测试
-        if: always()
-        run: ./gradlew test --no-daemon --stacktrace
-
-      - name: 测试结果摘要
-        if: always()
-        run: |
-          echo "===== 测试结果 ====="
-          find . -path "*/test-results/test*/*.xml" -exec cat {} \; 2>/dev/null | grep -E "testcase|tests=|failures=" || true
