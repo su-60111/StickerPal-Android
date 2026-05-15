@@ -5,6 +5,9 @@ on:
     branches: [main, master]
   workflow_dispatch:
 
+env:
+  ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+
 jobs:
   build:
     name: 构建 APK
@@ -20,20 +23,20 @@ jobs:
           java-version: "17"
           distribution: "temurin"
 
-      - name: 下载并安装 Gradle
+      - name: 安装 Android SDK 34
+        run: $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0"
+
+      - name: 下载 Gradle
         run: |
           wget -q https://services.gradle.org/distributions/gradle-8.2-bin.zip
           unzip -q gradle-8.2-bin.zip
-          echo "$(pwd)/gradle-8.2/bin" >> $GITHUB_PATH
-
-      - name: 生成 Gradle Wrapper
-        run: gradle wrapper --gradle-version 8.2
 
       - name: 构建 Debug APK
-        run: ./gradlew assembleDebug --no-daemon --stacktrace
+        run: |
+          gradle-8.2/bin/gradle assembleDebug --no-daemon --stacktrace
 
       - name: 运行单元测试
-        run: ./gradlew test --no-daemon --stacktrace
+        run: gradle-8.2/bin/gradle test --no-daemon --stacktrace
 
       - name: 上传 APK
         if: always()
