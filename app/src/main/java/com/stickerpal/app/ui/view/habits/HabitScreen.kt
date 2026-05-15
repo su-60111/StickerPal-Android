@@ -17,8 +17,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.items as gridItems
+import androidx.compose.foundation.lazy.items as listItems
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -108,7 +108,7 @@ fun HabitScreen(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
                 userScrollEnabled = false
             ) {
-                items(habitEntries, key = { it.type.name }) { entry ->
+                gridItems(habitEntries, key = { it.type.name }) { entry ->
                     HabitCard(
                         entry = entry,
                         onClick = {
@@ -150,7 +150,7 @@ fun HabitScreen(
                 )
             }
         } else {
-            items(todayRecords, key = { it.id }) { record ->
+            listItems(todayRecords, key = { it.id }) { record ->
                 TodayRecordItem(record = record)
             }
         }

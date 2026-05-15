@@ -20,7 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.MenuBook
@@ -72,7 +72,7 @@ private fun habitIcon(type: String): ImageVector = when (type) {
     "WATER" -> Icons.Default.WaterDrop
     "MEAL" -> Icons.Default.Restaurant
     "JOURNAL" -> Icons.Default.EditNote
-    else -> Icons.Default.ChevronRight
+    else -> Icons.Default.KeyboardArrowRight
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -378,7 +378,7 @@ private fun PetCard(
                 }
                 IconButton(onClick = onNavigateToPet) {
                     Icon(
-                        imageVector = Icons.Default.ChevronRight,
+                        imageVector = Icons.Default.KeyboardArrowRight,
                         contentDescription = "查看宠物",
                         tint = Color(0xFF5A7D4A)
                     )
