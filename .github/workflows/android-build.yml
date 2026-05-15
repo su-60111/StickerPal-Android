@@ -5,6 +5,9 @@ on:
     branches: [main, master]
   workflow_dispatch:
 
+env:
+  ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+
 jobs:
   build:
     name: 构建 APK
@@ -20,19 +23,10 @@ jobs:
           java-version: "17"
           distribution: "temurin"
 
-      - name: 查看已安装的 Android SDK
-        run: |
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
-          ls $ANDROID_SDK_ROOT/platforms/ || true
-          ls $ANDROID_SDK_ROOT/build-tools/ || true
-
-      - name: 安装 SDK 34（如需要）
+      - name: 安装 SDK 34
         run: |
           if [ ! -d "$ANDROID_SDK_ROOT/platforms/android-34" ]; then
-            echo "正在安装 android-34..."
-            $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0" || true
-          else
-            echo "android-34 已安装"
+            $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0"
           fi
 
       - name: 下载 Gradle
@@ -41,11 +35,19 @@ jobs:
           unzip -q gradle-8.2-bin.zip
 
       - name: 构建 Debug APK
-        continue-on-error: true
-        run: gradle-8.2/bin/gradle assembleDebug --no-daemon --stacktrace --info 2>&1 | tail -100
+        id: build
+        run: gradle-8.2/bin/gradle assembleDebug --no-daemon --stacktrace 2>&1 | tee build.log
+
+      - name: 显示构建结果
+        if: always()
+        run: |
+          echo "=== 构建目录 ==="
+          find app/build/outputs -name "*.apk" 2>/dev/null || echo "未找到 APK 文件"
+          echo "=== 错误信息 ==="
+          grep -A 5 "FAILURE\|error\|Error" build.log | tail -30 || echo "无错误"
 
       - name: 上传 APK
-        if: always()
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: stickerpal-debug

@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import java.util.Timer
-import kotlin.concurrent.scheduleAtFixedRate
+import java.util.TimerTask
 
 class HabitViewModel(application: Application) : AndroidViewModel(application) {
     private val database = AppDatabase.getInstance(application)
@@ -47,9 +47,11 @@ class HabitViewModel(application: Application) : AndroidViewModel(application) {
     fun startTimer() {
         _isTimerRunning.value = true
         timer = Timer().apply {
-            scheduleAtFixedRate(0, 1000) {
-                _timerSeconds.value = _timerSeconds.value + 1
-            }
+            schedule(object : TimerTask() {
+                override fun run() {
+                    _timerSeconds.value = _timerSeconds.value + 1
+                }
+            }, 0, 1000)
         }
     }
 
